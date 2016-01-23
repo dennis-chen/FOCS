@@ -27,22 +27,35 @@ Remarks, if any:
 
 (* Question 1 *)
 
-let gcd (a,b) = 
-   failwith "not implemented"
-
+(* Used description of Euclid's algorithm from wikipedia: 
+https://en.wikipedia.org/wiki/Greatest_common_divisor *)
+let rec gcd (a,b) = 
+    match (a,b) with 
+    | (a,0) -> a
+    | (0,b) -> b
+    | _ -> gcd (b, (a mod b))
 
 let is_coprime (a,b) = 
-   failwith "not implemented"
+    gcd (a,b) == 1
 
+(*returns number of coprimes when you pair nums between 1 
+and x with n *)
+let rec eulerHelper (n,x) = 
+    match (n,x) with
+    | (n,1) -> 1
+    | _ -> let prev = eulerHelper(n,x-1) in 
+        if is_coprime (n,x) then prev + 1 else prev
 
-let euler (n) = 
-   failwith "not implemented"
+let euler (n) = eulerHelper (n,n)
 
+let rec coprimeHelper (n,x) = 
+    if n == x then 
+        if is_coprime (n,x) then [x] else []
+    else
+        let prev = coprimeHelper(n,x+1) in 
+        if is_coprime (n,x) then (x :: prev) else prev
 
-let coprimes (n) = 
-   failwith "not implemented"
-
-
+let coprimes (n) = coprimeHelper(n,1)
 
 (* Question 2 *)
 
