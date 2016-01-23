@@ -95,26 +95,37 @@ let rec separate (xs) =
 
 (* Question 3 *)
 
-let setIn (e,xs) = 
-   failwith "not implemented"
+let rec setIn (e,xs) = 
+    match xs with 
+    | [] -> false
+    | h::t -> if (compare h e) == 0 then true else setIn (e,t)
 
+let rec setSub (xs,ys) = 
+    match xs with
+    | [] -> true
+    | h::t -> if setIn(h,ys) then setSub(t,ys) else false
 
-let setSub (xs,ys) = 
-   failwith "not implemented"
+let setEqual (xs,ys) = setSub(xs,ys) && setSub(ys,xs)
 
+let rec setUnion (xs,ys) = 
+    match (xs,ys) with 
+    | ([],[]) -> []
+    | (h::t,ys) -> let prev = setUnion(t,ys) in
+        if setIn(h,prev) then prev else h::prev
+    | ([],h::t) -> let prev = setUnion([],t) in
+        if setIn(h,prev) then prev else h::prev
 
-let setEqual (xs,ys) = 
-   failwith "not implemented"
+let rec setInter (xs,ys) = 
+    match xs with
+    | [] -> []
+    | h::t -> let prev = setInter(t,ys) in
+        if setIn(h,ys) then h::prev else prev
 
+let rec listLen (xs) = 
+    match xs with
+    | [] -> 0
+    | h::t -> 1 + listLen(t)
 
-let setUnion (xs,ys) = 
-   failwith "not implemented"
-
-
-let setInter (xs,ys) = 
-   failwith "not implemented"
-
-
-let setSize (xs) = 
-   failwith "not implemented"
-
+(* I wrote setUnion to return unique values so we can
+ * simply take the size of the union *)
+let setSize (xs) = listLen(setUnion(xs,xs))
