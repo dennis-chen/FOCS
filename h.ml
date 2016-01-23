@@ -38,8 +38,6 @@ let rec gcd (a,b) =
 let is_coprime (a,b) = 
     gcd (a,b) == 1
 
-(*returns number of coprimes when you pair nums between 1 
-and x with n *)
 let rec eulerHelper (n,x) = 
     match (n,x) with
     | (n,1) -> 1
@@ -59,26 +57,41 @@ let coprimes (n) = coprimeHelper(n,1)
 
 (* Question 2 *)
 
-let append (xs,ys) = 
-   failwith "not implemented"
+let rec appendElem (xs, x) =
+    match (xs, x) with 
+    | ([], x) -> [x]
+    | (h::t, x) -> h::(appendElem(t,x))
 
+let rec append (xs,ys) = 
+    match (xs,ys) with
+    | (x,[]) -> x
+    | (x,h::t) -> append(appendElem(x,h),t)
 
-let flatten (xss) = 
-   failwith "not implemented"
+let rec flatten (xss) = 
+    match xss with
+    | [] -> []
+    | h::t -> append(h, flatten(t))
 
+let rec nth (n,xs) = 
+    match (n,xs) with 
+    | (n,[]) -> failwith "out of bounds"
+    | (0,h::t) -> h
+    | (n,h::t) -> nth(n-1,t)
 
-let nth (n,xs) = 
-   failwith "not implemented"
+let rec last (xs) = 
+    match xs with 
+    | [] -> failwith "empty list"
+    | h::[] -> h
+    | h:: t -> last (t)
 
+let addVals (x,y,ls) = 
+    match ls with 
+    | (a,b) -> (x::a,y::b)
 
-let last (xs) = 
-   failwith "not implemented"
-
-
-let separate (xs) = 
-   failwith "not implemented"
-
-
+let rec separate (xs) = 
+    match xs with
+    | [] -> ([],[])
+    | (a,b)::t -> addVals (a,b,(separate (t)))
 
 (* Question 3 *)
 
