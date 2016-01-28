@@ -57,15 +57,10 @@ let coprimes (n) = coprimeHelper(n,1)
 
 (* Question 2 *)
 
-let rec appendElem (xs, x) =
-    match (xs, x) with 
-    | ([], x) -> [x]
-    | (h::t, x) -> h::(appendElem(t,x))
-
 let rec append (xs,ys) = 
     match (xs,ys) with
-    | (x,[]) -> x
-    | (x,h::t) -> append(appendElem(x,h),t)
+    | ([],ys) -> ys
+    | (h::t,ys) -> h::append(t,ys)
 
 let rec flatten (xss) = 
     match xss with
