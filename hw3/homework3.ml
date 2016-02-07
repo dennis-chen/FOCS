@@ -203,30 +203,66 @@ let dfa_q2_c = { states = [0;1;2;3;4;5;6;7];
      accepting = [3;6]
 }
 
-let nfa_q2_d = { states = [0];
-		 alphabet = ['a'];
-		 delta = [ ];
+let nfa_q2_d = { states = [0;1;2;3;4;5];
+		 alphabet = ['a';'b'];
+         delta = [(0,'a',1);
+                  (0,'b',5);
+                  (1,'a',2);
+                  (1,'b',5);
+                  (2,'a',3);
+                  (2,'b',5);
+                  (3,'a',3);
+                  (3,'b',4);
+                  (4,'a',3);
+                  (4,'b',4);
+                  (5,'a',5);
+                  (5,'b',5);
+                 ];
 		 start = 0;
-		 accepting = []}
+		 accepting = [1;2;3;5]
+}
 
 (* QUESTION 3 *)
 
+let rec keepTarget (trs) = 
+    match trs with 
+    | [] -> []
+    | (x,y,z)::t -> let prev = keepTarget(t) in
+              if contains prev z then prev else z::prev
 
-let keepTarget (trs) = failwith "keepTarget not implemented"
+let rec isAcceptingAny (fa,qs) = 
+    match qs with
+    | [] -> false
+    | h::t -> if contains fa.accepting h then true else isAcceptingAny (fa,t)
 
+let rec removeDups xs = 
+    match xs with
+    | [] -> []
+    | h::t -> if contains t h then removeDups t else h::(removeDups t)
 
-let isAcceptingAny (fa,qs) = failwith "isAcceptingAny not implemented"
+let rec stepAllHelper fa qs a = 
+    match qs with 
+    | [] -> []
+    | h::t -> (findTransitions(fa,h,a)) @ stepAllHelper fa t a
 
+let rec trsToStates trs =
+    match trs with
+    | [] -> []
+    | (x,y,z)::t -> z::(trsToStates t)
 
-let rec stepAll (fa,qs,a) = failwith "stepAll not implemented"
+let rec stepAll (fa,qs,a) = removeDups (trsToStates (stepAllHelper fa qs a))
 
+let rec stepsAllHelper fa qs syms = 
+    match syms with 
+    | [] -> qs
+    | h::t -> let prev = stepsAllHelper fa qs t in
+              stepAll(fa,prev,h)
 
-let rec stepsAll (fa,qs,syms) = failwith "stepsAll not implemented"
+let rec stepsAll (fa,qs,syms) = stepsAllHelper fa qs (reverse syms)
 
-
-let acceptNFA (fa,input) = failwith "acceptNFA not implemented"
-
-
+let acceptNFA (fa,input) = 
+    let qs = stepsAll(fa,fa.start::[],explode(input)) in
+    isAcceptingAny (fa,qs)
 
 
 (* 
