@@ -153,7 +153,7 @@ let dfa_q2_a = {
           (3,'b',3);
          ];
     start = 0;
-    accepting = [0]
+    accepting = [0;1;2]
 }
 
 
@@ -469,10 +469,10 @@ let testAcceptNFA =
 
 (* these need to be tested by hand *)
 (*
-langDFA (dfaThreeA,6);;
+langDFA (dfaThreeA,6);; //passes
 langDFA(dfa_q2_a,6);; BROKEN, missing b?
-langDFA (dfa_q2_b,7);;
-langDFA (dfa_q2_c,12);;
-langNFA (nfa_q2_d,7);;
-langNFA (nfaLastThreeB,7);;
+langDFA (dfa_q2_b,7);; //passes
+langDFA (dfa_q2_c,12);; //passes
+langNFA (nfa_q2_d,7);; //passes
+langNFA (nfaLastThreeB,7);; //passes
 *)
