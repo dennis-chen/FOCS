@@ -162,18 +162,18 @@ let dfa_q2_b = { states = [0;1;2;3;4;5;6;7];
      delta = [(0,'a',1);
               (0,'b',5);
               (1,'a',2);
-              (1,'b',0);
+              (1,'b',5);
               (2,'a',3);
-              (2,'b',0);
+              (2,'b',5);
               (3,'a',4);
-              (3,'b',0);
+              (3,'b',5);
               (4,'a',4);
               (4,'b',4);
-              (5,'a',0);
+              (5,'a',1);
               (5,'b',6);
-              (6,'a',0);
+              (6,'a',1);
               (6,'b',7);
-              (7,'a',0);
+              (7,'a',1);
               (7,'b',4)
              ];
      start = 0;
@@ -376,3 +376,103 @@ let langFA accept (fa,n) =
 let langDFA x = langFA acceptDFA x
 let langNFA x = langFA acceptNFA x
 
+(* Test functions *)
+let testFindTransitions = 
+    findTransitions (dfaThreeA,"start",'a') = [("start", 'a', "one")] &&
+    findTransitions (dfaThreeA,"start",'b') = [("start", 'b', "start")] &&
+    findTransitions (dfaThreeA,"one",'b') = [("one", 'b', "one")] &&
+    findTransitions (nfaLastThreeB,0,'a') = [(0, 'a', 0)] &&
+    findTransitions (nfaLastThreeB,0,'b') = [(0, 'b', 0); (0, 'b', 1)]
+
+let testIsAccepting = 
+    isAccepting (dfaThreeA,"start") = true &&
+    isAccepting (dfaThreeA,"one") = false &&
+    isAccepting (dfaThreeA,"two") = false &&
+    isAccepting (nfaLastThreeB,3) = true &&
+    isAccepting (nfaLastThreeB,0) = false
+
+let testStep =
+    step (dfaThreeA, "start",'a') = "one" &&
+    step (dfaThreeA, "start",'b') = "start" &&
+    step (dfaThreeA, "one",'a') = "two" &&
+    step (dfaThreeA, "one",'b') = "one" &&
+    step (dfaThreeA, "two",'a') = "start" &&
+    step (dfaThreeA, "two",'b') = "two"
+
+let testSteps = 
+    steps (dfaThreeA, "start", []) = "start" &&
+    steps (dfaThreeA, "start", ['a']) = "one" &&
+    steps (dfaThreeA, "start", ['a';'b']) = "one" &&
+    steps (dfaThreeA, "start", ['a';'b';'a']) = "two" &&
+    steps (dfaThreeA, "one", []) = "one" &&
+    steps (dfaThreeA, "one", ['a']) = "two" &&
+    steps (dfaThreeA, "one", ['a';'b']) = "two" &&
+    steps (dfaThreeA, "one", ['a';'b';'a']) = "start"
+
+let testIsDFA = 
+    isDFA (dfaThreeA) = true &&
+    isDFA (nfaLastThreeB) = false &&
+    isDFA {states=[0;1]; alphabet=['a']; delta=[(0,'a',1)]; start=0; accepting=[1]} = false
+
+let testLangDFA = 
+    acceptDFA (dfaThreeA,"") = true &&
+    acceptDFA (dfaThreeA,"a") = false &&
+    acceptDFA (dfaThreeA,"b") = true &&
+    acceptDFA (dfaThreeA,"aa") = false &&
+    acceptDFA (dfaThreeA,"aaa") = true &&
+    acceptDFA (dfaThreeA,"ababa") = true &&
+    acceptDFA (dfaThreeA,"abababa") = false
+
+let testKeepTarget = 
+    keepTarget [] = [] &&
+    keepTarget [(1,'a',2);(1,'b',3)] = [2; 3] &&
+    keepTarget [(1,'a',2);(1,'b',3);(2,'a',2)] = [3; 2] &&
+    keepTarget (dfaThreeA.delta) = ["start"; "one"; "two"] &&
+    keepTarget (nfaLastThreeB.delta) = [0; 1; 2; 3]
+
+let testIsAcceptingAny = 
+    isAcceptingAny (nfaLastThreeB, []) = false &&
+    isAcceptingAny (nfaLastThreeB, [0]) = false &&
+    isAcceptingAny (nfaLastThreeB, [0;1]) = false &&
+    isAcceptingAny (nfaLastThreeB, [0;1;2]) = false &&
+    isAcceptingAny (nfaLastThreeB, [0;1;2;3]) = true &&
+    isAcceptingAny (nfaLastThreeB, [3]) = true
+
+let testStepAll = 
+    stepAll (dfaThreeA,[],'a') = [] &&
+    stepAll (dfaThreeA,["start"],'a') = ["one"] &&
+    stepAll (dfaThreeA,["start"],'b') = ["start"] &&
+    stepAll (dfaThreeA,["start";"one"],'a') = ["one"; "two"] &&
+    stepAll (dfaThreeA,["start";"one"],'b') = ["start"; "one"] &&
+    stepAll (nfaLastThreeB,[0;1],'a') = [0] &&
+    stepAll (nfaLastThreeB,[0;1],'b') = [0; 1; 2]
+
+let testStepsAll = 
+    stepsAll (dfaThreeA,[],[]) = [] &&
+    stepsAll (dfaThreeA,[],['a']) = [] &&
+    stepsAll (dfaThreeA,[],['a';'b']) = [] &&
+    stepsAll (dfaThreeA,["start"],[]) = ["start"] &&
+    stepsAll (dfaThreeA,["start"],['a']) = ["one"] &&
+    stepsAll (dfaThreeA,["start"],['a';'b']) = ["one"] &&
+    stepsAll (dfaThreeA,["start"],['a';'a']) = ["two"] &&
+    stepsAll (dfaThreeA,["start";"one"],['a';'a']) = ["two"; "start"] &&
+    stepsAll (dfaThreeA,["start";"one"],['a';'a';'b']) = ["two"; "start"] &&
+    stepsAll (dfaThreeA,["start";"one"],['a';'a';'b';'a']) = ["start"; "one"] &&
+    stepsAll (nfaLastThreeB,[0;1],['a';'b';'b';'b']) = [0; 1; 2; 3]
+
+let testAcceptNFA = 
+    acceptNFA (dfaThreeA,"babab") = false &&
+    acceptNFA (dfaThreeA,"bababa") = true &&
+    acceptNFA (dfaThreeA,"bababab") = true &&
+    acceptNFA (nfaLastThreeB,"abb") = false &&
+    acceptNFA (nfaLastThreeB,"abbb") = true
+
+(* these need to be tested by hand *)
+(*
+langDFA (dfaThreeA,6);;
+langDFA(dfa_q2_a,6);; BROKEN, missing b?
+langDFA (dfa_q2_b,7);;
+langDFA (dfa_q2_c,12);;
+langNFA (nfa_q2_d,7);;
+langNFA (nfaLastThreeB,7);;
+*)
