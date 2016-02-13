@@ -173,13 +173,13 @@ let injectAt n a xs =
       xs (List.length(xs),[]) 
     with | (_,res) -> res
 
-let rec inject a xs = 
+let inject a xs = 
 if xs = [] then [[a]] else
 match
   let xsLong = (List.hd xs)::xs in (*Ugly, best way I could think of increasing the length of the list by one*)
   List.fold_right (fun x (i,acc) -> (i-1,(injectAt i a xs)::acc)) xsLong (List.length(xs),[])
 with | (_,res) -> res
 
-let rec injectAll a xss = List.fold_right (fun xs acc -> (inject a xs)@acc) xss []
+let injectAll a xss = List.fold_right (fun xs acc -> (inject a xs)@acc) xss []
 
 let permutations xs = List.fold_right (fun x acc -> injectAll x acc) xs [[]]
