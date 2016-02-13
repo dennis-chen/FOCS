@@ -89,14 +89,11 @@ let dfaThreeA = {
 
 (* QUESTION 1 *)
 
+let isAccepting dfa s = List.fold_right (fun x acc -> (x=s)||acc) dfa.accepting false
 
-let isAccepting dfa s = failwith "isAccepting not implemented"
+let steps dfa q syms = List.fold_right (fun x acc -> dfa.delta acc x) syms q
 
-
-let steps dfa q syms = failwith "steps not implemented"
-
-
-let acceptDFA dfa input = failwith "acceptDFA not implemented"
+let acceptDFA dfa input = isAccepting dfa (steps dfa dfa.start (explode input))
 
 (* This function loops through all the strings
  * of length up to n, and prints those that are accepted by the
@@ -140,10 +137,6 @@ let langDFA dfa n =
       else ()  in
       loop 0
 
-
-
-
-
 (* QUESTION 2 *)
 
 let max_positive xs =  List.fold_right max xs 0
@@ -164,7 +157,7 @@ let front xs = List.rev (List.tl (List.rev xs))
 
 let prefixes xs =  List.fold_right (fun _ acc -> [(front(List.hd acc))]@acc) xs [xs]
 
-let suffixes xs =  List.fold_right (fun x acc -> [[x]@(List.hd acc)]@acc) xs [[]]
+let suffixes xs =  List.fold_right (fun x acc -> [x::(List.hd acc)]@acc) xs [[]]
 
 let injectAt n a xs = 
   if n < 0 || n > List.length(xs) then failwith "Invalid index!" else
