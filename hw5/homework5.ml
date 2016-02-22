@@ -349,7 +349,7 @@ let binaryAddition = { states = ["start";"acc";"rej";
      | ("q1", "1") -> ("q1", "1", 0)
      | ("q1", "#") -> ("q1", "#", 0)
      | ("q1", "X") -> ("q1", "X", 0)
-     | ("q1", ">") -> ("q1", ">", 1)
+     | ("q1", ">") -> ("q2", ">", 1)
        (* Eat up 0s and 1s until first # or X reached *)
      | ("q2", "0") -> ("q2", "0", 1)
      | ("q2", "1") -> ("q2", "1", 1)
@@ -358,7 +358,7 @@ let binaryAddition = { states = ["start";"acc";"rej";
        (* Look at last digit of first number *)
      | ("q3", "0") -> ("q12", "X", 1)
      | ("q3", "1") -> ("q4", "X", 1)
-     | ("q3", ">") -> ("q19", ">", 1)
+     | ("q3", ">") -> ("q15", ">", 1)
        (* 1,_ branch: eat up xs to go to second number *)
      | ("q4", "#") -> ("q5", "#", 1)
      | ("q4", "X") -> ("q4", "X", 1)
@@ -373,9 +373,66 @@ let binaryAddition = { states = ["start";"acc";"rej";
      | ("q6", "1") -> ("q9", "X", 0) (*go backwards to do carry*)
      | ("q6", "#") -> ("rej","#",1) (*num digits not equal*)
      | ("q6", "X") -> failwith "q6"
-
-     CONTINUE HERE
-
+       (* 1,0 branch: go to last non X non _ char *)
+     | ("q7", "#") -> ("q75","#",1)
+     | ("q7", "X") -> ("q7","X",1)
+     | ("q7", "_") -> failwith "q7"
+       (* 1,0 branch: go to last non X non _ char *)
+     | ("q75", "0") -> ("q75","0",1)
+     | ("q75", "1") -> ("q75","1",1)
+     | ("q75", "#") -> failwith "q75"
+     | ("q75", "X") -> ("q8","X",0)
+     | ("q75", "_") -> ("q8","_",0) 
+       (* 1,0 branch: look at last non X non _ char *)
+     | ("q8", "0") -> ("rej", "0", 1)
+     | ("q8", "1") -> ("q1", "X", 0) (* rewind *)
+     | ("q8", "#") -> ("q1", "#", 0) (* rewind *)
+     | ("q8", "X") -> failwith "q8 X"
+     | ("q8", "_") -> failwith "q8 _"
+       (* 1,1 branch: add and carry *)
+     | ("q9", "0") -> ("q10","1", 1) (* Add one *)
+     | ("q9", "1") -> ("q9","0", 0) (* Carry left *)
+     | ("q9", "#") -> ("q10", "#", 1) (* We carried into the hashtag *)
+     | ("q9", "X") -> failwith "q9 X"
+     | ("q9", "_") -> failwith "q9 _"
+       (* 1,1 branch: go to last non X non _ char *)
+     | ("q10", "#") -> ("q105","#",1)
+     | ("q10", "X") -> ("q10","X",1)
+     | ("q10", "0") -> ("q10","0",1)
+     | ("q10", "1") -> ("q10","1",1)
+     | ("q10", c) -> failwith "q10"
+       (* 1,1 branch: go to last non X non _ char *)
+     | ("q105", "0") -> ("q105", "0", 1)
+     | ("q105", "1") -> ("q105", "1", 1)
+     | ("q105", "#") -> failwith "q105"
+     | ("q105", "X") -> ("q11","X",0)
+     | ("q105", "_") -> ("q11","_",0)
+       (* 1,1 branch: look at last non X non _ char *)
+     | ("q11", "0") -> ("q1", "X", 0) (* rewind *)
+     | ("q11", "1") -> ("rej", "1", 1) 
+     | ("q11", "#") -> ("q1", "#", 0) (* rewind *)
+     | ("q11", "X") -> failwith "q11 X"
+     | ("q11", "_") -> failwith "q11 _"
+       (* 0,_ branch: eat up xs to go to second number *)
+     | ("q12", "#") -> ("q13", "#", 1)
+     | ("q12", "X") -> ("q12", "X", 1)
+     | ("q12", _) -> failwith "q12"
+       (* 0,_ branch: eat up 0s and 1s until first # or X reached *)
+     | ("q13", "0") -> ("q13", "0", 1)
+     | ("q13", "1") -> ("q13", "1", 1)
+     | ("q13", "#") -> ("q14", "#", 0)
+     | ("q13", "X") -> ("q14", "X", 0)
+       (* 0,_ branch: examine last digit of second number *)
+     | ("q14", "0") -> ("q10", "X", 1)
+     | ("q14", "1") -> ("q7", "X", 1) 
+     | ("q14", "#") -> ("rej","#",1) (*num digits not equal*)
+     | ("q14", "X") -> failwith "q14"
+       (* Go through entire string and check that it's all X or hashtags *)
+     | ("q15", "0") -> ("rej", "0", 1)
+     | ("q15", "1") -> ("rej", "1", 1) 
+     | ("q15", "#") -> ("q15","#",1) 
+     | ("q15", "X") -> ("q15","X",1)
+     | ("q15", "_") -> ("acc","_",1)
        (* Accepting State *)
      | ("acc", "0") -> ("acc", "0", 1)
      | ("acc", "1") -> ("acc", "1", 1)
