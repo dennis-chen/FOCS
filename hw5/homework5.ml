@@ -332,13 +332,57 @@ let tm_q2_b = { states = ["start";"acc";"rej";"q1";"q2";"q3";"q4";"q5";"q6";"q7"
 (* QUESTION 3 *)
 
 
-let binaryAddition = { states = ["x"];
-		       input_alphabet = ["x"];
-		       tape_alphabet = ["x"];
-		       blank = "x";
-		       left_marker = "x";
-		       start = "x";
-		       accept = "x";
-		       reject = "x";
-		       delta = (fun (x,y) -> (x,y,0))}
+let binaryAddition = { states = ["start";"acc";"rej";
+    "q1";"q2";"q3";"q4";"q5";"q6";"q7";"q8";"q9";
+    "q10";"q11";"q12";"q13";"q14";"q15";"q16";"q17";"q18"];
+    input_alphabet = ["0";"1";"#"];
+    tape_alphabet = ["0";"1";"#";"X";">";"_"];
+		blank = "_";
+		left_marker = ">";
+		start = "start";
+		accept = "acc";
+		reject = "rej";
+     delta = (fun inp -> match inp with
+     | ("start", ">") -> ("q2", ">", 1)
+       (* Rewind *)
+     | ("q1", "0") -> ("q1", "0", 0)
+     | ("q1", "1") -> ("q1", "1", 0)
+     | ("q1", "#") -> ("q1", "#", 0)
+     | ("q1", "X") -> ("q1", "X", 0)
+     | ("q1", ">") -> ("q1", ">", 1)
+       (* Eat up 0s and 1s until first # or X reached *)
+     | ("q2", "0") -> ("q2", "0", 1)
+     | ("q2", "1") -> ("q2", "1", 1)
+     | ("q2", "#") -> ("q3", "#", 0)
+     | ("q2", "X") -> ("q3", "X", 0)
+       (* Look at last digit of first number *)
+     | ("q3", "0") -> ("q12", "X", 1)
+     | ("q3", "1") -> ("q4", "X", 1)
+     | ("q3", ">") -> ("q19", ">", 1)
+       (* 1,_ branch: eat up xs to go to second number *)
+     | ("q4", "#") -> ("q5", "#", 1)
+     | ("q4", "X") -> ("q4", "X", 1)
+     | ("q4", _) -> failwith "q4"
+       (* 1,_ branch: eat up 0s and 1s until first # or X reached *)
+     | ("q5", "0") -> ("q5", "0", 1)
+     | ("q5", "1") -> ("q5", "1", 1)
+     | ("q5", "#") -> ("q6", "#", 0)
+     | ("q5", "X") -> ("q6", "X", 0)
+       (* 1,_ branch: examine last digit of second number *)
+     | ("q6", "0") -> ("q7", "X", 1)
+     | ("q6", "1") -> ("q9", "X", 0) (*go backwards to do carry*)
+     | ("q6", "#") -> ("rej","#",1) (*num digits not equal*)
+     | ("q6", "X") -> failwith "q6"
+
+     CONTINUE HERE
+
+       (* Accepting State *)
+     | ("acc", "0") -> ("acc", "0", 1)
+     | ("acc", "1") -> ("acc", "1", 1)
+     | ("acc", "#") -> ("acc", "#", 1)
+     | ("acc", "X") -> ("acc", "X", 1)
+     | ("acc", ">") -> ("acc", ">", 1)
+     | ("acc", "_") -> ("acc", "_", 1)
+       (* Rejecting *)
+     | (_,c) -> ("rej",c,1))}
 
