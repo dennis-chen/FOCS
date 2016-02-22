@@ -243,29 +243,91 @@ let anbncn = { states = ["start";"q1";"q2";"q3";"q4";"q5";"q6";"acc";"rej"];
 (* REPLACE BY YOUR OWN DEFINITIONS *)
 
 
-let tm_q2_a = { states = ["x"];
-		input_alphabet = ["x"];
-		tape_alphabet = ["x"];
-		blank = "x";
-		left_marker = "x";
-		start = "x";
-		accept = "x";
-		reject = "x";
-		delta = (fun (x,y) -> (x,y,0))}
+let tm_q2_a = { states = ["start";"acc";"rej";"q1";"q2";"q3";"q4";"q5";"q6"];
+	     input_alphabet = ["c";"d"];
+       tape_alphabet = ["c";"d";"_";">";"X"];
+	     blank = "_";
+	     left_marker = ">";
+	     start = "start";
+	     accept = "acc";
+	     reject = "rej";
+	     delta = (fun inp -> match inp with
+			 | ("start", ">") -> ("q1", ">", 1)
+			 | ("q1", "c") -> ("q2", "X", 1)
+			 | ("q1", "d") -> ("q5", "X", 1)
+			 | ("q1", "X") -> ("acc", "X", 1)
+			 | ("q1", "_") -> ("acc", "_", 1)
+			 | ("q2", "c") -> ("q2", "c", 1)
+			 | ("q2", "d") -> ("q2", "d", 1)
+			 | ("q2", "X") -> ("q3", "X", 0)
+			 | ("q2", "_") -> ("q3", "_", 0)
+			 | ("q3", "c") -> ("q4", "X", 0)
+			 | ("q3", "d") -> ("rej", "d", 0)
+			 | ("q3", "X") -> ("acc", "X", 0)
+			 | ("q3", "_") -> failwith "unexpected q3 state!"
+			 | ("q4", "c") -> ("q4", "c", 0)
+			 | ("q4", "d") -> ("q4", "d", 0)
+			 | ("q4", "X") -> ("q1", "X", 1)
+			 | ("q4", "_") -> failwith "unexpected q4 state!"
+			 | ("q5", "c") -> ("q5", "c", 1)
+			 | ("q5", "d") -> ("q5", "d", 1)
+			 | ("q5", "X") -> ("q6", "X", 0)
+			 | ("q5", "_") -> ("q6", "_", 0)
+			 | ("q6", "c") -> ("rej", "c", 0)
+			 | ("q6", "d") -> ("q4", "X", 0)
+			 | ("q6", "X") -> ("acc", "X", 0)
+			 | ("q6", "_") -> failwith "unexpected q6 state!"
+			 | ("acc", "c") -> ("acc", "c", 1)
+			 | ("acc", "d") -> ("acc", "d", 1)
+			 | ("acc", ">") -> ("acc", ">", 1)
+			 | ("acc", "_") -> ("acc", "_", 1)
+			 | (_,c) -> ("rej",c,1))}
 
-
-let tm_q2_b = { states = ["x"];
-		input_alphabet = ["x"];
-		tape_alphabet = ["x"];
-		blank = "x";
-		left_marker = "x";
-		start = "x";
-		accept = "x";
-		reject = "x";
-		delta = (fun (x,y) -> (x,y,0))}
-
-
-
+let tm_q2_b = { states = ["start";"acc";"rej";"q1";"q2";"q3";"q4";"q5";"q6";"q7";"q8"];
+		input_alphabet = ["a";"b"];
+		tape_alphabet = ["a";"b";"X";">";"_"];
+		blank = "_";
+		left_marker = ">";
+		start = "start";
+		accept = "acc";
+		reject = "rej";
+     delta = (fun inp -> match inp with
+     | ("start", ">") -> ("q1", ">", 1)
+     | ("q1", "b") -> ("q1", "b", 1)
+     | ("q1", "a") -> ("q2", "a", 1)
+     | ("q1", "X") -> failwith "q1 unexpected X"
+     | ("q1", "_") -> ("q3", "_", 0)
+     | ("q2", "a") -> ("q2", "a", 1)
+     | ("q2", "_") -> ("q3", "_", 0)
+     | ("q3", "a") -> ("q3", "a", 0)
+     | ("q3", "b") -> ("q3", "b", 0)
+     | ("q3", "X") -> ("q3", "X", 0)
+     | ("q3", "_") -> failwith "q3 unexpected _"
+     | ("q3", ">") -> ("q4", ">", 1)
+     | ("q4", "X") -> ("q4", "X", 1)
+     | ("q4", "b") -> ("q5", "X", 1)
+     | ("q4", "_") -> ("acc","_",1)
+     | ("q5", "a") -> ("q6", "X", 1)
+     | ("q5", "b") -> ("q5", "b", 1)
+     | ("q5", "X") -> ("q5", "X", 1)
+     | ("q5", "_") -> ("rej","_",1)
+     | ("q6", "a") -> ("q7", "X", 1)
+     | ("q6", "b") -> ("rej","b",1)
+     | ("q6", "X") -> ("rej","X",1)
+     | ("q6", "_") -> ("rej","_",1)
+     | ("q7", "a") -> ("q8", "X", 1)
+     | ("q7", "b") -> ("rej","b",1)
+     | ("q7", "X") -> ("rej","X",1)
+     | ("q7", "_") -> ("rej","_",1)
+     | ("q8", "a") -> ("q3", "a", 0)
+     | ("q8", "b") -> ("rej","b",1)
+     | ("q8", "X") -> failwith "q8 unexpected X"
+     | ("q8", "_") -> ("q3", "_", 0)
+     | ("acc", "c") -> ("acc", "c", 1)
+     | ("acc", "d") -> ("acc", "d", 1)
+     | ("acc", ">") -> ("acc", ">", 1)
+     | ("acc", "_") -> ("acc", "_", 1)
+     | (_,c) -> ("rej",c,1))}
 
 (* QUESTION 3 *)
 
