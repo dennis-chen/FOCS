@@ -293,17 +293,64 @@ let add1 =
 
 (* QUESTION 3 *)
 
+let isIn xs x = List.fold_right (fun y acc -> (x=y)||acc) xs false
 
 let permutation = 
-  { states = ["x"];
-    input_alphabet = ["x"];
-    tape_alphabet = ["x"];
-    start = "x";
-    accept = "x";
-    reject = "x";
-    blank = "x";
-    left_marker = "x";
-    delta = (fun x -> ("x","x",0)) }
+  let alphabet = ""::(explode "abcdefghijklmnopqrstuvwxyz") in
+  let ia = "#"::alphabet in
+  let ta = [">";"_";"X"]@ia in
+  let s = pairs ["start";"acc";"rej";"v1";"v2";"checkFirst";
+            "rewind";"lastU";"crossU";"crossV";"emptyU";"allCrossed"] 
+          alphabet in
+  { states = s;
+    input_alphabet = ia;
+    tape_alphabet = ta;
+    start = ("start","");
+    accept = ("acc","");
+    reject = ("rej","");
+    blank = "_";
+    left_marker = ">";
+    delta = (fun x -> 
+    match x with
+    (* v1 and v2 validate the input and check that strings 
+     * contain valid symbols *)
+    | (("start",""),">") -> (("v1",""),">",1)
+    | (("v1",""),"#") -> (("v2",""),"#",1)
+    | (("v1",""),l) -> if isIn alphabet l then (("v1",""),l,1)
+                                            else (("rej",""),l,1)
+    | (("v2",""),"_") -> (("rewind",""),"_",0)
+    | (("v2",""),l) -> if isIn alphabet l then (("v2",""),l,1)
+                                            else (("rej",""),l,1)
+    | (("rewind",s),">") -> (("checkFirst",""),">",1)
+    | (("rewind",s),l) -> (("rewind",s),l,0)
 
+    | (("checkFirst",s),"#") -> (("emptyU",s),"#",1)
+    | (("checkFirst",s),"X") -> (("allCrossed",s),"X",1)
+    | (("checkFirst",s),l) -> (("lastU",s),l,1)
+
+    | (("emptyU",s),"_") -> (("acc",""),"_",1)
+    | (("emptyU",s),l) -> (("rej",""),l,1)
+
+    | (("allCrossed",s),"X") -> (("allCrossed",s),"X",1)
+    | (("allCrossed",s),"#") -> (("allCrossed",s),"#",1)
+    | (("allCrossed",s),"_") -> (("acc",""),"_",1)
+    | (("allCrossed",s),l) -> (("rej",""),l,1)
+
+    | (("lastU",s),"X") -> (("crossU",s),"X",0)
+    | (("lastU",s),"#") -> (("crossU",s),"#",0)
+    | (("lastU",s),l) -> (("lastU",s),l,1)
+
+    | (("crossU",s),l) -> (("crossV",l),"X",1)
+
+    | (("crossV",s),"X") -> (("crossV",s),"X",1)
+    | (("crossV",s),"#") -> (("crossV",s),"#",1)
+    | (("crossV",s),"_") -> (("rej",""),"_",1)
+    | (("crossV",s),l) -> if s = l then (("rewind",s),"X",0)
+                                   else (("crossV",s),l,1)
+  )}
+
+let permTrans (x,y) = x^"|"^y;;
+
+let p = transform permutation permTrans
 
 let copies n = failwith "copies not implemented yet"
