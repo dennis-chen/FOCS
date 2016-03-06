@@ -353,4 +353,43 @@ let permTrans (x,y) = x^"|"^y;;
 
 let p = transform permutation permTrans
 
-let copies n = failwith "copies not implemented yet"
+let copies n = 
+  if n <= 0 then failwith "n must be larger than 0!" else
+    { states = triples ["start";"acc";"rej";"v1";"rewind"] [0;1;-1] (range (n));
+    input_alphabet = ["0";"1";"#"];
+    tape_alphabet = ["0";"1";"#";">";"_"];
+    start = ("start",-1,0);
+    accept = ("acc",-1,0);
+    reject = ("rej",-1,0);
+    blank = "_";
+    left_marker = ">";
+    delta = (fun x -> 
+    match x with
+    (* v1 checks that all symbols are 0s, 1s, or #s 
+     * and that there is a proper number of #s*)
+    | (("start",-1,0),">") -> (("v1",-1,0),">",1)
+    | (("v1",-1,j),"0") -> (("v1",-1,j),"0",1)
+    | (("v1",-1,j),"1") -> (("v1",-1,j),"1",1)
+    | (("v1",-1,j),"#") -> if j = n then (("rej",-1,0),"#",1)
+                                    else (("v1",-1,j+1),"#",1)
+    | (("v1",-1,j),"_") -> if j = n-1 then (("rewind",-1,j),"_",0)
+                                      else (("rej",-1,0),"_",1)
+        
+    | (("v1",-1,j),l) -> (("rej",-1,0),l,1)
+
+    | (("rewind",i,j),"0") -> (("rewind",i,j),"0",0)
+    | (("rewind",i,j),"1") -> (("rewind",i,j),"1",0)
+    | (("rewind",i,j),"#") -> (("rewind",i,j),"#",0)
+    | (("rewind",i,j),">") -> (("checkFirst",0,0),">",1)
+
+    (*
+     *
+    | (("checkFirst",i,j),"#")
+    | (("checkFirst",i,j),"X")
+    | (("checkFirst",i,j),l) -> ((""))
+     * *)
+  )}
+
+let copiesTrans (x,y,z) = x^"|"^(string_of_int y)^"|"^(string_of_int z)
+
+let c = transform (copies 1) copiesTrans
