@@ -295,7 +295,7 @@ let add1 =
 
 let isIn xs x = List.fold_right (fun y acc -> (x=y)||acc) xs false
 
-let permutation = 
+let permutationTupleStates = 
   let alphabet = ""::(explode "abcdefghijklmnopqrstuvwxyz") in
   let ia = "#"::alphabet in
   let ta = [">";"_";"X"]@ia in
@@ -351,11 +351,14 @@ let permutation =
 
 let permTrans (x,y) = x^"|"^y;;
 
-let p = transform permutation permTrans
+let permutation = transform permutationTupleStates permTrans
 
-let copies n = 
+let copiesTupleStates n = 
   if n <= 0 then failwith "n must be larger than 0!" else
-    { states = triples ["start";"acc";"rej";"v1";"rewind"] [0;1;-1] (range (n));
+    { states = triples ["start";"acc";"rej";"v1";"rewind";
+    "checkFirst";"allHash";"allCrossed";"findFirst";"crossFirst";
+    "nextCopy1";"nextCopy2";"crossNext"] 
+    [0;1;-1] (range (n));
     input_alphabet = ["0";"1";"#"];
     tape_alphabet = ["0";"1";"#";">";"_"];
     start = ("start",-1,0);
@@ -372,24 +375,51 @@ let copies n =
     | (("v1",-1,j),"1") -> (("v1",-1,j),"1",1)
     | (("v1",-1,j),"#") -> if j = n then (("rej",-1,0),"#",1)
                                     else (("v1",-1,j+1),"#",1)
-    | (("v1",-1,j),"_") -> if j = n-1 then (("rewind",-1,j),"_",0)
-                                      else (("rej",-1,0),"_",1)
+    | (("v1",-1,j),"_") -> if j = n-1 then 
+                              if n = 1 then (("acc",-1,0),"_",1)
+                              else (("rewind",-1,j),"_",0)
+                           else (("rej",-1,0),"_",1)
         
     | (("v1",-1,j),l) -> (("rej",-1,0),l,1)
 
-    | (("rewind",i,j),"0") -> (("rewind",i,j),"0",0)
-    | (("rewind",i,j),"1") -> (("rewind",i,j),"1",0)
-    | (("rewind",i,j),"#") -> (("rewind",i,j),"#",0)
-    | (("rewind",i,j),">") -> (("checkFirst",0,0),">",1)
+    | (("rewind",i,j),">") -> (("checkFirst",-1,0),">",1)
+    | (("rewind",i,j),l) -> (("rewind",i,j),l,0)
 
-    (*
-     *
-    | (("checkFirst",i,j),"#")
-    | (("checkFirst",i,j),"X")
-    | (("checkFirst",i,j),l) -> ((""))
-     * *)
+    | (("checkFirst",i,j),"#") -> (("allHash",i,j),"#",1)
+    | (("checkFirst",i,j),"X") -> (("allCrossed",i,j),"X",1)
+    | (("checkFirst",i,j),l) -> (("findFirst",i,j),l,1)
+
+    | (("allHash",i,j),"#") -> (("allHash",i,j),"#",1)
+    | (("allHash",i,j),"_") -> (("acc",-1,0),"_",1)
+    | (("allHash",i,j),l) -> (("rej",-1,0),l,1)
+
+    | (("allCrossed",i,j),"#") -> (("allCrossed",i,j),"#",1)
+    | (("allCrossed",i,j),"X") -> (("allCrossed",i,j),"X",1)
+    | (("allCrossed",i,j),"_") -> (("acc",-1,0),"_",1)
+    | (("allCrossed",i,j),l) -> (("rej",-1,0),l,1)
+
+    | (("findFirst",i,j),"#") -> (("crossFirst",i,j),"#",0)
+    | (("findFirst",i,j),"X") -> (("crossFirst",i,j),"X",0)
+    | (("findFirst",i,j),l) -> (("findFirst",i,j),l,1)
+
+    | (("crossFirst",i,j),l) -> (("nextCopy1",(int_of_string l),j+1),"X",1)
+
+    | (("nextCopy1",i,j),"#") -> (("nextCopy2",i,j),"#",1)
+    | (("nextCopy1",i,j),"_") -> failwith "unexpected _ in nextCopy1"
+    | (("nextCopy1",i,j),l) -> (("nextCopy1",i,j),l,1)
+
+    | (("nextCopy2",i,j),"#") -> (("crossNext",i,j),"#",0)
+    | (("nextCopy2",i,j),"X") -> (("crossNext",i,j),"X",0)
+    | (("nextCopy2",i,j),"_") -> (("crossNext",i,j),"_",0)
+    | (("nextCopy2",i,j),l) -> (("nextCopy2",i,j),l,1)
+
+    | (("crossNext",i,j),"#") -> (("rej",-1,0),"#",1)
+    | (("crossNext",i,j),l) -> if (int_of_string l) = i then 
+                                  if j = n-1 then (("rewind",-1,0),"X",0)
+                                  else (("nextCopy1",i,j+1),"X",1) 
+                               else (("rej",-1,0),l,1)
   )}
 
 let copiesTrans (x,y,z) = x^"|"^(string_of_int y)^"|"^(string_of_int z)
 
-let c = transform (copies 1) copiesTrans
+let copies n = transform (copiesTupleStates n) copiesTrans
