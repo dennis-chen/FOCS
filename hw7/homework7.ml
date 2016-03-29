@@ -331,57 +331,34 @@ let dfaGrammar dfa = failwith "dfaGrammar not implemented"
  *)
 
 let addition = {
-  nonterminals = ["S";"A";"B";"C"];
+  nonterminals = ["S"];
   terminals = ["+";"=";"x"];
-  rules = [("S","ASC");
+  rules = [("S","xSx");
           ("S","+T");
-          ("T","BTC");
-          ("T","=");
-          ("A","x");
-          ("B","x");
-          ("C","x")];
+          ("T","xTx");
+          ("T","=")];
   startsym = "S"
 } 
 
 (* Sequence of rewrites for xx+xxx=xxxxx 
- S
- -> ASC
- -> xSC
- -> xASCC
- -> xxSCC
- -> xx+TCC
- -> xx+BTCCC
- -> xx+xTCCC
- -> xx+xBTCCCC
- -> xx+xxTCCCC
- -> xx+xxBTCCCCC
- -> xx+xxxTCCCCC
- -> xx+xxx=CCCCC
- -> xx+xxx=xCCCC
- -> xx+xxx=xxCCC
- -> xx+xxx=xxxCC
- -> xx+xxx=xxxxC
- -> xx+xxx=xxxxx
+   S
+   -> xSx
+   -> xxSxx
+   -> xx+Txx
+   -> xx+xTxxx
+   -> xx+xxTxxxx
+   -> xx+xxxTxxxxx
+   -> xx+xxx=xxxxx
 
   Sequence of rewrites for xxx+xx=xxxxx
- S
- -> ASC
- -> xSC
- -> xASCC
- -> xxSCC
- -> xxASCCC
- -> xxxSCCC
- -> xxx+TCCC
- -> xxx+BTCCCC
- -> xxx+xTCCCC
- -> xxx+xBTCCCCC
- -> xxx+xxTCCCCC
- -> xxx+xx=CCCCC
- -> xxx+xx=xCCCC
- -> xxx+xx=xxCCC
- -> xxx+xx=xxxCC
- -> xxx+xx=xxxxC
- -> xxx+xx=xxxxx
+   S
+   -> xSx
+   -> xxSxx
+   -> xxxSxxx
+   -> xxx+Txxx
+   -> xxx+xTxxxx
+   -> xxx+xxTxxxxx
+   -> xxx+xx=xxxxx
 *)
 
 
@@ -423,4 +400,4 @@ let powers2 = {
   -> aaaaaaaaXE
   -> aaaaaaaaE
   -> aaaaaaaa
- * )
+*)
