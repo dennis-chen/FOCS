@@ -24,7 +24,6 @@ Remarks, if any:
  *
  *)
 
-
 (*
  * Type for grammars
  *
@@ -319,10 +318,17 @@ let dfaThreeA = {
   accepting = ["S"]
 } 
 
+let pair xs ys = List.fold_right (fun x acc ->
+   (List.map (fun y -> (x,y)) ys)@acc) xs []
 
-
-let dfaGrammar dfa = failwith "dfaGrammar not implemented"
-
+let dfaGrammar dfa = {
+  nonterminals = dfa.states;
+  terminals = List.map (fun x -> String.make 1 x) dfa.alphabet;
+  rules = 
+    (List.map (fun (p,a) -> let q = dfa.delta p a in (p,(String.make 1 a)^q))
+    (pair dfa.states dfa.alphabet)) @ (List.map (fun x -> (x,"")) dfa.accepting);
+  startsym = dfa.start;
+} 
 
 
 (*
