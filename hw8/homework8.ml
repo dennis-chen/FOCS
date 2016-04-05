@@ -330,6 +330,8 @@ let update_snd = ("update_snd","/p./v.pair (fst p) v")
  * 
  *)
 
+let q1_alone = [ minus; geq; eq; pair; match_pair; fst; snd; update_fst; update_snd]
+
 let q1_defs = default_defs @ [ minus; geq; eq; pair; match_pair; fst; snd; update_fst; update_snd]
 
 
@@ -346,13 +348,65 @@ let q1_defs = default_defs @ [ minus; geq; eq; pair; match_pair; fst; snd; updat
  *
  *)
 
-let int = ("int","not_implemented")
+let int = ("int","/n.pair true n")
 
-let neg_int = ("neg_int","not_implemented")
+let neg_int = ("neg_int","/i. if (fst i) (update_fst i false) (update_fst i true)")
 
-let plus_int = ("plus_int","not_implemented")
+let plus_int = ("plus_int","/m./n.
+  if (fst m) 
+  (
+    if (fst n)
+    (
+      pair true (plus (snd m) (snd n))
+    )
+    (
+      if (geq (snd m) (snd n))
+      (
+        pair true (minus (snd m) (snd n))
+      )
+      (
+        pair false (minus (snd n) (snd m))
+      )
+    )
+  )
+  (
+    if (fst n)
+    (
+      if (geq (snd m) (snd n))
+      (
+        pair false (minus (snd m) (snd n))
+      )
+      (
+        pair true (minus (snd n) (snd m))
+      )
+    )
+    (
+      pair false (plus (snd m) (snd n))
+    )
+  )
+")
 
-let times_int = ("times_int","not_implemented")
+let times_int = ("times_int","/m./n.
+  if (fst m) 
+  (
+    if (fst n)
+    (
+      int ((snd n) (plus (snd m)) (_0))
+    )
+    (
+      neg_int (int ((snd n) (plus (snd m)) (_0)))
+    )
+  )
+  (
+    if (fst n)
+    (
+      neg_int (int ((snd n) (plus (snd m)) (_0)))
+    )
+    (
+      int ((snd n) (plus (snd m)) (_0))
+    )
+  )
+")
 
 
 (* 
@@ -360,7 +414,7 @@ let times_int = ("times_int","not_implemented")
  * 
  *)
 
-let q2_defs = default_defs @ [int; neg_int; plus_int; times_int ]
+let q2_defs = default_defs @ q1_alone @ [int; neg_int; plus_int; times_int ]
 
 
 (*************************************************************
