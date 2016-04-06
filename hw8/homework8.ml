@@ -330,8 +330,6 @@ let update_snd = ("update_snd","/p./v.pair (fst p) v")
  * 
  *)
 
-let q1_alone = [ minus; geq; eq; pair; match_pair; fst; snd; update_fst; update_snd]
-
 let q1_defs = default_defs @ [ minus; geq; eq; pair; match_pair; fst; snd; update_fst; update_snd]
 
 
@@ -414,7 +412,7 @@ let times_int = ("times_int","/m./n.
  * 
  *)
 
-let q2_defs = default_defs @ q1_alone @ [int; neg_int; plus_int; times_int ]
+let q2_defs = q1_defs @ [int; neg_int; plus_int; times_int ]
 
 
 (*************************************************************
@@ -429,19 +427,19 @@ let q2_defs = default_defs @ q1_alone @ [int; neg_int; plus_int; times_int ]
  *
  *)
 
-let empty = ("empty","not_implemented")
+let empty = ("empty","/a./f.a")
 
-let cons = ("cons","not_implemented")
+let cons = ("cons","/h./t./a./f.f h t")
 
-let match_list = ("match_list","not_implemented")
+let match_list = ("match_list","/l./a./f.l a f")
 
-let length = ("length","not_implemented")
+let length = ("length","Y (/length./l.match_list l _0 (/h./t.succ (length t)))")
 
-let sum = ("sum","not_implemented")
+let sum = ("sum","Y (/sum./l.match_list l _0 (/h./t.plus h (sum t)))")
 
-let append = ("append","not_implemented")
+let append = ("append","Y (/append./l1./l2.match_list l1 l2 (/h./t.cons h (append t l2)))")
 
-let map = ("map","not_implemented")
+let map = ("map","Y (/map./f./l.match_list l empty (/h./t.cons (f h) (map f t)))")
 
 let q3_defs = default_defs @ [empty; cons; match_list; length; sum; append; map]
 
