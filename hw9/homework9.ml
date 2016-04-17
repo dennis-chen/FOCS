@@ -184,18 +184,30 @@ let rec stutter s =
  * 
  *)
 
-let rec arctan z = failwith "not implemented"
+let scalef n s = map (fun x -> n*.x) s
 
-(* PLACEHOLDER -- REPLACE WITH YOUR OWN DEFINITION *)
+let rec arctan z = let rec t () = fby (cst (z,3.0,-1.0)) 
+  (fun () -> map (fun (a,b,c)-> (a+.c*.((z**b)/.b),b+.2.0,c*.(-1.0))) (t()))
+  in map (fun (a,b,c) -> a) (t ())
 
-let pi = cst (0)
+let pi = 
+  map (fun (a,b) -> 16.0*.a -. 4.0*.b) (zip (arctan (1.0/.5.0)) (arctan (1.0/.239.0)))
     
-let rec newton f df guess = failwith "not implemented"
+let rec newton f df guess = 
+  fby (cst guess) (fun () -> map (fun x -> x -. ((f(x))/.(df(x)))) (newton f df guess))
 
-let derivative f x = failwith "not implemented"
+let posNatFloats =
+  let rec temp () = fby (cst 1.0)
+  (fun () -> (map (fun x -> x+.1.0) (temp ()))) in
+  temp ()
 
-let limit epsilon s = failwith "not implemented"
+let derivative f x = 
+  map (fun n -> (((f (x+.(1.0/.n)))-.(f x))/.(1.0/.n))) posNatFloats
 
+let drop s = let (f,r) = split s in r (*Riccardo's function*)
+
+let limit epsilon s = filter (fun a b -> (abs_float (a -. b)) < epsilon) 
+  (drop s) s
 
 (* 
  * QUESTION 3 
