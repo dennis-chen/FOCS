@@ -215,12 +215,25 @@ let limit epsilon s = filter (fun a b -> (abs_float (a -. b)) < epsilon)
  *)
 
 
-let rev_prefixes s = failwith "not implemented"
+let rev_prefixes s = 
+  let init = cst [] in
+  fold (fun x accum -> x::accum) (init) s
 
-let prefixes s = failwith "not implemented"
+let prefixes s = map List.rev (rev_prefixes s)
 
-let stripes s1 s2 = failwith "not implemented"
+let stripes s1 s2 = map (fun (a,b) -> List.combine a b) 
+  (zip (prefixes s1) (rev_prefixes s2))
 
-let rec flatten ss = failwith "not implemented"
+(*Passes by n elements from s1 before passing through s2 *)
+let fbyn n s1 s2 = 
+  let rec count i = fby i (fun () -> (map (fun x -> x-1) (count i))) in
+  map (fun (x,(s1,s2)) -> if x > 0 then s1 else s2) (zip (count n) (zip (s1) (s2)))
+
+(*Takes cst stream of list, returns elements of that list one at a time until
+ * no elements left, then returns -1 *)
+let flat s = map (fun (n,l) -> if n < List.length l then List.nth l n else -1) (zip nats s)
+
+let rec flatten ss = let (fst,rst) = split ss in
+  fbyn (map List.length fst) (flat fst) (flatten rst)
 
 let pairs s1 s2 =  failwith "not implemented"
